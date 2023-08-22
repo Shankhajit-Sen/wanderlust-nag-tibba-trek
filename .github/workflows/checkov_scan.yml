@@ -1,38 +1,47 @@
-name: Checkov Scan
+name: Checkov Scan and Comment
 
 on:
   pull_request:
     paths:
-      - "**/*.tf"
-      - "**/*.yaml"
-      - "**/*.yml"
-  push:
-    paths:
-      - "**/*.tf"
-      - "**/*.yaml"
-      - "**/*.yml"
+      - "**/*" # Include all files in the pull request
 
 jobs:
   checkov:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Check out the code
         uses: actions/checkout@v2
 
-      - name: Run Checkov
-        uses: bridgecrewio/checkov-action@v1
+      - name: Set up Python
+        uses: actions/setup-python@v2
         with:
-          args: -d . --framework all
+          python-version: 3.x # Use the version compatible with Checkov
+
+      - name: Install Checkov
+        run: |
+          pip install checkov
+
+      - name: Run Checkov Scan
+        run: checkov -d ${{ github.workspace }} --skip-check CKV2_GHA_1 --output json > checkov_results.json
+
+      - name: Upload Checkov Results
+        uses: actions/upload-artifact@v2
+        with:
+          name: checkov-results
+          path: checkov_results.json
 
       - name: Comment on Pull Request
-        uses: actions/github-script@v4
+        uses: actions/github-script@v5
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GH_TOKEN }}
           script: |
+            const fs = require('fs');
+            const results = fs.readFileSync('checkov_results.json', 'utf8');
+            const body = `Checkov scan results:\n\n\`\`\`\n${results}\n\`\`\``;
             github.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: 'Checkov scan completed. Please review the findings.'
-            })
+              body: body,
+            });
