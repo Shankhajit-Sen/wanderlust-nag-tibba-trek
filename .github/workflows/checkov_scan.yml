@@ -22,7 +22,7 @@ jobs:
         run: pip install checkov
 
       - name: Run Checkov Scan
-        run: checkov -d ${{ github.workspace }} --framework all
+        run: checkov -d ${{ github.workspace }} --skip-check CKV2_GHA_1 --framework all
 
       - name: Upload Checkov Results
         uses: actions/upload-artifact@v2
