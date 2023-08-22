@@ -1,4 +1,4 @@
-name: Checkov Scan and Comment
+name: Checkov Scan
 
 on:
   pull_request:
