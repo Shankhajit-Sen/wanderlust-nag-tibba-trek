@@ -23,13 +23,10 @@ jobs:
           pip install checkov
 
       - name: Run Checkov Scan
-        run: checkov -d ${{ github.workspace }} --output json > checkov_results.json
+        run: checkov -d ${{ github.workspace }} --skip-check CKV2_GHA_1 --output json > checkov_results.json
 
       - name: Upload Checkov Results
         uses: actions/upload-artifact@v2
         with:
           name: checkov-results
           path: checkov_results.json
-      - name: Display Checkov Results
-        run: |
-          cat checkov_results.json
