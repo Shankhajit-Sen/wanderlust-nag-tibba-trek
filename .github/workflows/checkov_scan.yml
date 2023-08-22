@@ -39,12 +39,9 @@ jobs:
             const fs = require('fs');
             const results = fs.readFileSync('checkov_results.json', 'utf8');
             const body = `Checkov scan results:\n\n\`\`\`\n${results}\n\`\`\``;
-            const { context, issues } = github;
-            const { issue } = context;
-            const { createComment } = issues;
-            createComment({
-              issue_number: issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
+            github.issues.createComment({
+              issue_number: github.context.payload.pull_request.number,
+              owner: github.context.repo.owner,
+              repo: github.context.repo.repo,
               body: body,
             });
