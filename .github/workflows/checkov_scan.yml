@@ -28,8 +28,12 @@ jobs:
       - name: Display Checkov Results
         run: |
           RESULTS=$(cat checkov_results.json)
-          echo "$RESULTS"
-          
+          PASSED=$(echo "$RESULTS" | jq '.[0].results.passed_checks | length')
+          FAILED=$(echo "$RESULTS" | jq '.[0].results.failed_checks | length')
+          SKIPPED=$(echo "$RESULTS" | jq '.[0].results.skipped_checks | length')
+          BODY="Checkov scan results:\n\nPassed: $PASSED\nFailed: $FAILED\nSkipped: $SKIPPED"
+          echo "$BODY"
+
       - name: Upload Checkov Results
         uses: actions/upload-artifact@v2
         with:
