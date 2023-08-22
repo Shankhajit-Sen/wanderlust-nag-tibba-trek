@@ -23,23 +23,15 @@ jobs:
           pip install checkov
 
       - name: Run Checkov Scan
-        run: checkov -d ${{ github.workspace }} --skip-check CKV2_GHA_1 --quiet --output json > checkov_results.json
+        run: checkov -d ${{ github.workspace }} --skip-check CKV2_GHA_1 --output json > checkov_results.json
 
+      - name: Display Checkov Results
+        run: |
+          RESULTS=$(cat checkov_results.json)
+          echo "$RESULTS"
+          
       - name: Upload Checkov Results
         uses: actions/upload-artifact@v2
         with:
           name: checkov-results
           path: checkov_results.json
-
-      - name: Display Checkov Summary
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          RESULTS=$(cat checkov_results.json)
-          PASSED=$(echo "$RESULTS" | jq '.passed_rules | length')
-          FAILED=$(echo "$RESULTS" | jq '.failed_rules | length')
-          SKIPPED=$(echo "$RESULTS" | jq '.skipped_rules | length')
-          BODY="Checkov scan results:\n\nPassed: $PASSED\nFailed: $FAILED\nSkipped: $SKIPPED"
-          URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments"
-          PR_NUMBER=$(jq -r .pull_request.number "${GITHUB_EVENT_PATH}")
-          curl -s -X POST "$URL" -H "Authorization: Bearer ${GITHUB_TOKEN}" -d "{\"body\":\"$BODY\"}"
