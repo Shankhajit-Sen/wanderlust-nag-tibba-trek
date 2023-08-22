@@ -30,3 +30,6 @@ jobs:
         with:
           name: checkov-results
           path: checkov_results.json
+      - name: Display Checkov Results
+        run: |
+          cat checkov_results.json
