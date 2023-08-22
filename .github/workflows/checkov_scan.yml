@@ -39,4 +39,6 @@ jobs:
           RESULTS=$(cat checkov_results.json)
           BODY="Checkov scan results:\n\n\`\`\`\n${RESULTS}\n\`\`\`"
           URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments"
-          curl -s -X POST "$URL" -H "Authorization: Bearer ${GITHUB_TOKEN}" -d "{\"body\":\"$BODY\"}"
+          AUTH_HEADER="Authorization: Bearer ${GITHUB_TOKEN}"
+          DATA="{\"body\":\"$BODY\"}"
+          echo "$DATA" | curl -s -X POST "$URL" -H "$AUTH_HEADER" -d @-
