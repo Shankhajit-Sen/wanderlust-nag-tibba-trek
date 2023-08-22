@@ -26,9 +26,9 @@ jobs:
         run: |
           checkov -d ${{ github.workspace }} --skip-check CKV2_GHA_1 --framework all --output json > checkov-results.json
           RESULTS=$(cat checkov-results.json)
-          PASSED=$(echo "$RESULTS" | jq '.summary.passed')
-          FAILED=$(echo "$RESULTS" | jq '.summary.failed')
-          SKIPPED=$(echo "$RESULTS" | jq '.summary.skipped')
+          PASSED=$(echo "$RESULTS" | jq '.passed_checks | length')
+          FAILED=$(echo "$RESULTS" | jq '.failed_checks | length')
+          SKIPPED=$(echo "$RESULTS" | jq '.skipped_checks | length')
           echo "Checkov scan results:"
           echo "Passed: $PASSED"
           echo "Failed: $FAILED"
