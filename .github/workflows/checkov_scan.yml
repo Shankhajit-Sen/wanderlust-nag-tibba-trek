@@ -30,6 +30,12 @@ jobs:
         with:
           name: checkov-results
           path: checkov_results.json
+      
+      - name: Debug Output
+        run: |
+          echo "GITHUB_REPOSITORY=${GITHUB_REPOSITORY}"
+          echo "GITHUB_EVENT_PATH=${GITHUB_EVENT_PATH}"
+          echo "GITHUB_TOKEN=${GITHUB_TOKEN}"
 
       - name: Comment on Pull Request
         env:
