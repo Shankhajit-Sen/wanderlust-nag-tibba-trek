@@ -30,19 +30,3 @@ jobs:
         with:
           name: checkov-results
           path: checkov_results.json
-
-      - name: Debug Output
-        run: |
-          echo "GITHUB_REPOSITORY=${GITHUB_REPOSITORY}"
-          echo "GITHUB_EVENT_PATH=${GITHUB_EVENT_PATH}"
-          echo "GITHUB_TOKEN=${GITHUB_TOKEN}"
-
-      - name: Comment on Pull Request
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          PR_NUMBER=$(jq -r .pull_request.number "${GITHUB_EVENT_PATH}")
-          RESULTS=$(cat checkov_results.json)
-          BODY="Checkov scan results:\n\n\`\`\`\n${RESULTS}\n\`\`\`"
-          URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments"
-          curl -s -X POST "$URL" -H "Authorization: Bearer ${GITHUB_TOKEN}" -d "{\"body\":\"$BODY\"}"
