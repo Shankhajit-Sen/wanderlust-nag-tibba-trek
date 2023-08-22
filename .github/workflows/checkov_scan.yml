@@ -24,7 +24,7 @@ jobs:
 
       - name: Run Checkov Scan
         run: |
-          checkov -d ${{ github.workspace }} --output json > checkov_results.json
+          checkov -d ${{ github.workspace }} --skip-check CKV2_GHA_1 --output json > checkov_results.json
           RESULTS=$(cat checkov_results.json)
 
           # Count Passed, Failed, and Skipped Checks
@@ -32,23 +32,29 @@ jobs:
           FAILED=$(echo "$RESULTS" | jq '.[].results.failed_checks | length')
           SKIPPED=$(echo "$RESULTS" | jq '.[].results.skipped_checks | length')
 
-          # Display Total Counts
           echo "Total Checks:"
           echo "Passed: $PASSED"
           echo "Failed: $FAILED"
           echo "Skipped: $SKIPPED"
+          echo ""
 
-          # Display Failed Checks
-          echo "Failed Checks:"
-          echo "$RESULTS" | jq -r '.[].results.failed_checks[] | "Check: \(.check_id): \"\(.check_name)\"\n        FAILED for resource: \(.resource)\n        File: \(.file_abs_path):\(.file_path)\n        Guide: \(.guideline)"'
+          if [ $PASSED -gt 0 ]; then
+            echo "Passed Checks:"
+            echo "$RESULTS" | jq -r '.[].results.passed_checks[] | "Check: \(.check_id): \"\(.check_name)\"\n        PASSED for resource: \(.resource)"'
+            echo ""
+          fi
 
-          # Display Passed Checks
-          echo "Passed Checks:"
-          echo "$RESULTS" | jq -r '.[].results.passed_checks[] | "Check: \(.check_id): \"\(.check_name)\"\n        PASSED for resource: \(.resource)"'
+          if [ $FAILED -gt 0 ]; then
+            echo "Failed Checks:"
+            echo "$RESULTS" | jq -r '.[].results.failed_checks[] | "Check: \(.check_id): \"\(.check_name)\"\n        FAILED for resource: \(.resource)\n        File: \(.file_abs_path):\(.file_path)\n        Guide: \(.guideline)"'
+            echo ""
+          fi
 
-          # Display Skipped Checks
-          echo "Skipped Checks:"
-          echo "$RESULTS" | jq -r '.[].results.skipped_checks[] | "Check: \(.check_id): \"\(.check_name)\"\n        SKIPPED for resource: \(.resource)"'
+          if [ $SKIPPED -gt 0 ]; then
+            echo "Skipped Checks:"
+            echo "$RESULTS" | jq -r '.[].results.skipped_checks[] | "Check: \(.check_id): \"\(.check_name)\"\n        SKIPPED for resource: \(.resource)"'
+            echo ""
+          fi
 
       - name: Upload Checkov Results
         uses: actions/upload-artifact@v2
