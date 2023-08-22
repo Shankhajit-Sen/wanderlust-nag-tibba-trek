@@ -3,61 +3,45 @@ name: Checkov Scan
 on:
   pull_request:
     paths:
-      - "**/*" # Include all files in the pull request
+      - '**/*'  # Include all files in the pull request
 
 jobs:
   checkov:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out the code
-        uses: actions/checkout@v2
+    - name: Check out the code
+      uses: actions/checkout@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.x # Use the version compatible with Checkov
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.x  # Use the version compatible with Checkov
 
-      - name: Install Checkov
-        run: |
-          pip install checkov
+    - name: Install Checkov
+      run: |
+        pip install checkov
 
-      - name: Run Checkov Scan
-        run: |
-          checkov -d ${{ github.workspace }} --skip-check CKV2_GHA_1 --output json > checkov_results.json
-          RESULTS=$(cat checkov_results.json)
+    - name: Run Checkov Scan
+      run: checkov -d ${{ github.workspace }} --output json > checkov_results.json
 
-          # Count Passed, Failed, and Skipped Checks
-          PASSED=$(echo "$RESULTS" | jq '.[].results.passed_checks | length')
-          FAILED=$(echo "$RESULTS" | jq '.[].results.failed_checks | length')
-          SKIPPED=$(echo "$RESULTS" | jq '.[].results.skipped_checks | length')
+    - name: Upload Checkov Results
+      uses: actions/upload-artifact@v2
+      with:
+        name: checkov-results
+        path: checkov_results.json
 
-          echo "Total Checks:"
-          echo "Passed: $PASSED"
-          echo "Failed: $FAILED"
-          echo "Skipped: $SKIPPED"
-          echo ""
-
-          if [ $PASSED -gt 0 ]; then
-            echo "Passed Checks:"
-            echo "$RESULTS" | jq -r '.[].results.passed_checks[] | "Check: \(.check_id): \"\(.check_name)\"\n        PASSED for resource: \(.resource)"'
-            echo ""
-          fi
-
-          if [ $FAILED -gt 0 ]; then
-            echo "Failed Checks:"
-            echo "$RESULTS" | jq -r '.[].results.failed_checks[] | "Check: \(.check_id): \"\(.check_name)\"\n        FAILED for resource: \(.resource)\n        File: \(.file_abs_path):\(.file_path)\n        Guide: \(.guideline)"'
-            echo ""
-          fi
-
-          if [ $SKIPPED -gt 0 ]; then
-            echo "Skipped Checks:"
-            echo "$RESULTS" | jq -r '.[].results.skipped_checks[] | "Check: \(.check_id): \"\(.check_name)\"\n        SKIPPED for resource: \(.resource)"'
-            echo ""
-          fi
-
-      - name: Upload Checkov Results
-        uses: actions/upload-artifact@v2
-        with:
-          name: checkov-results
-          path: checkov_results.json
+    - name: Comment on Pull Request
+      uses: actions/github-script@v5
+      with:
+        github-token: ${{ secrets.GH_TOKEN }}
+        script: |
+          const fs = require('fs');
+          const results = fs.readFileSync('checkov_results.json', 'utf8');
+          const body = `Checkov scan results:\n\n\`\`\`\n${results}\n\`\`\``;
+          github.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: body,
+          });
