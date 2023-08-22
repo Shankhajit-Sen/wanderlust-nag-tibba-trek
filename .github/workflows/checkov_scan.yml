@@ -24,7 +24,7 @@ jobs:
 
       - name: Run Checkov Scan
         run: |
-          checkov -d ${{ github.workspace }} --skip-check CKV2_GHA_1 --output json > checkov_results.json
+          checkov -d ${{ github.workspace }} --output json > checkov_results.json
           RESULTS=$(cat checkov_results.json)
 
           # Count Passed, Failed, and Skipped Checks
