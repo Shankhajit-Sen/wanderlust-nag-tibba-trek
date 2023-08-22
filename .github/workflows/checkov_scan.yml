@@ -45,4 +45,3 @@ jobs:
               repo: github.context.repo.repo,
               body: body,
             });
-
