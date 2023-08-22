@@ -1,18 +1,23 @@
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: mypv
-spec:
-  capacity:
-    storage: <Size>
-  volumeMode: Filesystem
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Recycle
-  storageClassName: slow
-  mountOptions:
-    - hard
-    - nfsvers=4.1
-  nfs:
-    path: /tmp
-    server: 172.17.0.2
+AWSTemplateFormatVersion: "2010-09-09"
+Description: A sample CloudFormation template
+
+Resources:
+  MyS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: my-unique-bucket-name
+      AccessControl: Private
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        RestrictPublicBuckets: false
+      LoggingConfiguration:
+        DestinationBucketName: my-logs-bucket
+        LogFilePrefix: s3-logs/
