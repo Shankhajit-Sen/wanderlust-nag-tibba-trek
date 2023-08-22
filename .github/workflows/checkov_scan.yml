@@ -3,56 +3,30 @@ name: Checkov Scan
 on:
   pull_request:
     paths:
-      - "**/*"
+      - "**/*" # Include all files in the pull request
 
 jobs:
   checkov:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Check out the code
         uses: actions/checkout@v2
 
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.x
+          python-version: 3.x # Use the version compatible with Checkov
 
       - name: Install Checkov
-        run: pip install checkov
+        run: |
+          pip install checkov
 
       - name: Run Checkov Scan
-        id: checkov
-        run: |
-          checkov -d ${{ github.workspace }} --skip-check CKV2_GHA_1 --framework all --output json > checkov-results.json
-          RESULTS=$(cat checkov-results.json)
-          PASSED=$(echo "$RESULTS" | jq '.passed_checks | length')
-          FAILED=$(echo "$RESULTS" | jq '.failed_checks | length')
-          SKIPPED=$(echo "$RESULTS" | jq '.skipped_checks | length')
-          echo "Checkov scan results:"
-          echo "Passed: $PASSED"
-          echo "Failed: $FAILED"
-          echo "Skipped: $SKIPPED"
+        run: checkov -d ${{ github.workspace }} --skip-check CKV2_GHA_1 --output json > checkov_results.json
 
       - name: Upload Checkov Results
         uses: actions/upload-artifact@v2
         with:
           name: checkov-results
-          path: checkov-results.json
-
-      - name: Comment on Pull Request
-        uses: actions/github-script@v4
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const context = github.context.payload;
-            const prNumber = context.pull_request.number;
-            const owner = context.repository.owner.login;
-            const repo = context.repository.name;
-            const commentBody = `Checkov scan results:\n\nPassed: ${process.env.PASSED}\nFailed: ${process.env.FAILED}\nSkipped: ${process.env.SKIPPED}`;
-            github.issues.createComment({
-              owner: owner,
-              repo: repo,
-              issue_number: prNumber,
-              body: commentBody
-            });
+          path: checkov_results.json
