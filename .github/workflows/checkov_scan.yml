@@ -23,16 +23,17 @@ jobs:
           pip install checkov
 
       - name: Run Checkov Scan
-        run: checkov -d ${{ github.workspace }} --skip-check CKV2_GHA_1 --output json > checkov_results.json
-
-      - name: Display Checkov Results
         run: |
+          checkov -d ${{ github.workspace }} --skip-check CKV2_GHA_1 --output json > checkov_results.json
           RESULTS=$(cat checkov_results.json)
-          PASSED=$(echo "$RESULTS" | jq '.[0].results.passed_checks | length')
-          FAILED=$(echo "$RESULTS" | jq '.[0].results.failed_checks | length')
-          SKIPPED=$(echo "$RESULTS" | jq '.[0].results.skipped_checks | length')
-          BODY="Checkov scan results:\n\nPassed: $PASSED\nFailed: $FAILED\nSkipped: $SKIPPED"
-          echo "$BODY"
+
+          # Display Failed Checks
+          echo "Failed Checks:"
+          echo "$RESULTS" | jq -r '.[].results.failed_checks[] | "Check: \(.check_id): \"\(.check_name)\"\n        FAILED for resource: \(.resource)\n        File: \(.file_abs_path):\(.file_path)\n        Guide: \(.guideline)"'
+
+          # Display Passed Checks
+          echo "Passed Checks:"
+          echo "$RESULTS" | jq -r '.[].results.passed_checks[] | "Check: \(.check_id): \"\(.check_name)\"\n        PASSED for resource: \(.resource)"'
 
       - name: Upload Checkov Results
         uses: actions/upload-artifact@v2
