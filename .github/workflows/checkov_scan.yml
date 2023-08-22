@@ -30,7 +30,7 @@ jobs:
         with:
           name: checkov-results
           path: checkov_results.json
-      
+
       - name: Debug Output
         run: |
           echo "GITHUB_REPOSITORY=${GITHUB_REPOSITORY}"
