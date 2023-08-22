@@ -18,3 +18,6 @@ Resources:
         IgnorePublicAcls: true
         BlockPublicPolicy: true
         RestrictPublicBuckets: true
+      LoggingConfiguration:
+        DestinationBucketName: my-logs-bucket
+        LogFilePrefix: s3-logs/
