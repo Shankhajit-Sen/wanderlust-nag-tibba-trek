@@ -33,16 +33,17 @@ jobs:
       - name: Post Comment
         uses: actions/github-script@v4
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            const path = require('path');
-            const artifactPath = path.join('${{ github.workspace }}', 'checkov-results.json');  // Use the correct path to the uploaded artifact
-            const results = JSON.parse(fs.readFileSync(artifactPath, 'utf8'));
-            const comment = `Checkov scan results:\n\nPassed checks: ${results.passed_checks.length}\nFailed checks: ${results.failed_checks.length}\nSkipped checks: ${results.skipped_checks.length}`;
-            github.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: comment
-            });
+            github-token: ${{ secrets.GITHUB_TOKEN }}
+            script: |
+                const fs = require('fs');
+                const path = require('path');
+                const artifactPath = path.join(process.env.GITHUB_WORKSPACE, 'checkov-results');
+                const resultsFilePath = path.join(artifactPath, 'checkov-results.json');
+                const results = JSON.parse(fs.readFileSync(resultsFilePath, 'utf8'));
+                const comment = `Checkov scan results:\n\nPassed checks: ${results.passed_checks.length}\nFailed checks: ${results.failed_checks.length}\nSkipped checks: ${results.skipped_checks.length}`;
+                github.issues.createComment({
+                    issue_number: context.issue.number,
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    body: comment
+                });
