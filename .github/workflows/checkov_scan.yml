@@ -30,10 +30,14 @@ jobs:
         with:
           name: checkov-results
           path: checkov_results.json
-          
-      - name: Print Artifact Path
+
+      - name: Find checkov-results.json
         run: |
-          echo "Artifact path: ${{ github.workspace }}/checkov-results"
+            echo "Path to checkov-results.json:"
+            find $GITHUB_WORKSPACE -type f -name "checkov-results.json" | while read -r file; do
+            echo "$file"
+            done
+
       - name: Post Comment
         uses: actions/github-script@v4
         with:
