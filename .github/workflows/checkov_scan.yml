@@ -33,25 +33,23 @@ jobs:
 
       - name: Find checkov-results.json
         run: |
-            echo "Path to checkov-results.json:"
-            find $GITHUB_WORKSPACE -type f -name "checkov-results.json" | while read -r file; do
-              echo "$file"
-            done
+          echo "Path to checkov-results.json:"
+          ls -R $GITHUB_WORKSPACE | grep "checkov-results.json"
 
       - name: Post Comment
         uses: actions/github-script@v4
         with:
-            github-token: ${{ secrets.GITHUB_TOKEN }}
-            script: |
-                const fs = require('fs');
-                const path = require('path');
-                const artifactPath = path.join(process.env.GITHUB_WORKSPACE, 'checkov-results');
-                const resultsFilePath = path.join(artifactPath, 'checkov-results.json');
-                const results = JSON.parse(fs.readFileSync(resultsFilePath, 'utf8'));
-                const comment = `Checkov scan results:\n\nPassed checks: ${results.passed_checks.length}\nFailed checks: ${results.failed_checks.length}\nSkipped checks: ${results.skipped_checks.length}`;
-                github.issues.createComment({
-                    issue_number: context.issue.number,
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    body: comment
-                });
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const artifactPath = path.join(process.env.GITHUB_WORKSPACE, 'checkov-results');
+            const resultsFilePath = path.join(artifactPath, 'checkov-results.json');
+            const results = JSON.parse(fs.readFileSync(resultsFilePath, 'utf8'));
+            const comment = `Checkov scan results:\n\nPassed checks: ${results.passed_checks.length}\nFailed checks: ${results.failed_checks.length}\nSkipped checks: ${results.skipped_checks.length}`;
+            github.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+            });
