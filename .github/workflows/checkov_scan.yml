@@ -30,6 +30,10 @@ jobs:
         with:
           name: checkov-results
           path: checkov_results.json
+          
+      - name: Print Artifact Path
+        run: |
+          echo "Artifact path: ${{ github.workspace }}/checkov-results"
       - name: Post Comment
         uses: actions/github-script@v4
         with:
