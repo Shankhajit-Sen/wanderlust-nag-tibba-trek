@@ -35,7 +35,7 @@ jobs:
         run: |
             echo "Path to checkov-results.json:"
             find $GITHUB_WORKSPACE -type f -name "checkov-results.json" | while read -r file; do
-            echo "$file"
+              echo "$file"
             done
 
       - name: Post Comment
