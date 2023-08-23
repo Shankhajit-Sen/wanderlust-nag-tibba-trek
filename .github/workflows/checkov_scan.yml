@@ -30,3 +30,17 @@ jobs:
         with:
           name: checkov-results
           path: checkov_results.json
+      - name: Post Comment
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const results = JSON.parse(fs.readFileSync('checkov-results.json', 'utf8'));
+            const comment = `Checkov scan results:\n\nPassed checks: ${results.passed_checks.length}\nFailed checks: ${results.failed_checks.length}\nSkipped checks: ${results.skipped_checks.length}`;
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
