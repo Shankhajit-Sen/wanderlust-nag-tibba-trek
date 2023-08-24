@@ -3,35 +3,29 @@ name: Checkov Scan
 on:
   pull_request:
     paths:
-      - "**/*" # Include all files in the pull request
+      - "**/*"
 
 jobs:
   checkov:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out the code
+      - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.x # Use the version compatible with Checkov
+          python-version: 3.x
 
       - name: Install Checkov
-        run: |
-          pip install checkov
+        run: pip install checkov
 
       - name: Run Checkov Scan
-        run: checkov -d ${{ github.workspace }} --skip-check CKV2_GHA_1 --output json > checkov_results.json
+        run: checkov -d ${{ github.workspace }} --skip-check CKV2_GHA_1 --framework all
 
       - name: Upload Checkov Results
         uses: actions/upload-artifact@v2
         with:
           name: checkov-results
-          path: checkov_results.json
-
-      - name: Find checkov-results.json
-        run: |
-          echo "Path to checkov-results.json:"
-          ls -R $GITHUB_WORKSPACE | grep "checkov-results.json"
+          path: checkov-results.json
